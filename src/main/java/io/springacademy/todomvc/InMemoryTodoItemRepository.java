@@ -11,15 +11,7 @@ import java.util.function.Predicate;
 @Repository
 class InMemoryTodoItemRepository implements TodoItemRepository {
 	private AtomicLong counter = new AtomicLong(0);
-	private Map<Long, TodoItem> map = new ConcurrentHashMap<Long, TodoItem>() {
-		@Override
-		public TodoItem get(Object key) {
-			if (super.get(key) == null) {
-				throw new TodoItemNotFoundException((Long) key);
-			}
-			return super.get(key);
-		}
-	};
+	private Map<Long, TodoItem> map = new ConcurrentHashMap<>();
 
 	@Override
 	public Collection<TodoItem> findAll() {
@@ -37,16 +29,19 @@ class InMemoryTodoItemRepository implements TodoItemRepository {
 
 	@Override
 	public void delete(Long todoId) {
+		checkIfExists(todoId);
 		map.remove(todoId);
 	}
 
 	@Override
 	public void update(TodoItem todoItem) {
+		checkIfExists(todoItem.getId());
 		map.put(todoItem.getId(), todoItem);
 	}
 
 	@Override
 	public TodoItem findOne(Long todoId) {
+		checkIfExists(todoId);
 		return map.get(todoId);
 	}
 
@@ -57,5 +52,11 @@ class InMemoryTodoItemRepository implements TodoItemRepository {
 				map.remove(k);
 			}
 		});
+	}
+
+	private void checkIfExists(Long todoItemId) {
+		if (!map.containsKey(todoItemId)) {
+			throw new TodoItemNotFoundException(todoItemId);
+		}
 	}
 }
