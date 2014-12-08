@@ -23,7 +23,7 @@ class TodoController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE)
-	public Collection<TodoItem> deleteAll() {
+	public Collection<TodoItem> deleteCompleted() {
 		todoRepository.remove(TodoItem::isCompleted);
 		return todoRepository.findAll();
 	}
